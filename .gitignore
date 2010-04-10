@@ -1,0 +1,9 @@
+*.pdf
+*.dvi
+*.log
+*.aux
+*.pdfsync
+*.tex~
+*.bbl
+*.blg
+*.backup

@@ -1,0 +1,179 @@
+%% bare_jrnl.tex
+%% V1.1
+%% 2002/08/13
+%% by Michael Shell
+%% mshell@ece.gatech.edu
+%%
+%% NOTE: This text file uses MS Windows line feed conventions. When (human)
+%% reading this file on other platforms, you may have to use a text
+%% editor that can handle lines terminated by the MS Windows line feed
+%% characters (0x0D 0x0A).
+%%
+%% This is a skeleton file demonstrating the use of IEEEtran.cls
+%% (requires IEEEtran.cls version 1.6 or later) with an IEEE journal paper.
+%%
+%% Support sites:
+%% http://www.ieee.org
+%% and/or
+%% http://www.ctan.org/tex-archive/macros/latex/contrib/supported/IEEEtran/
+%%
+%% This code is offered as-is - no warranty - user assumes all risk.
+%% Free to use, distribute and modify.
+
+% *** Authors should verify (and, if needed, correct) their LaTeX system  ***
+% *** with the testflow diagnostic prior to trusting their LaTeX platform ***
+% *** with production work. IEEE's font choices can trigger bugs that do  ***
+% *** not appear when using other class files.                            ***
+% Testflow can be obtained at:
+% http://www.ctan.org/tex-archive/macros/latex/contrib/supported/IEEEtran/testflow
+
+
+% Note that the a4paper option is mainly intended so that authors in
+% countries using A4 can easily print to A4 and see how their papers will
+% look in print. Authors are encouraged to use U.S. letter paper when
+% submitting to IEEE. Use the testflow package mentioned above to verify
+% correct handling of both paper sizes by the author's LaTeX system.
+%
+% Also note that the "draftcls", not "draft", option should be used if
+% it is desired that the figures are to be displayed in draft mode.
+
+% *************************************************************************
+% You can now use this template both for submitting to peer review and,
+% if your paper is accepted, for sending in final publication materials.
+% To change from peer review format (single column, double-spaced) to
+% final publication format (double column, single-spaced), just move the
+% comment-line sign (%) from one \documentclass line to the other.
+% The first is for peer review format(single column), the second is for final publication(double column).
+
+\documentclass[12pt,journal,draftcls,letterpaper,onecolumn]{IEEEtran}
+%\documentclass[9.5pt,journal,final,finalsubmission,twocolumn]{IEEEtran}
+% *************************************************************************
+
+\usepackage{times}
+\usepackage{epsfig}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amscd}
+\usepackage{amssymb}
+\usepackage{subfigure}
+\usepackage{pdfsync}
+\usepackage{helvet}
+\usepackage{url}
+
+%\usepackage[retainorgcmds]{IEEEtrantools}
+
+% Include other packages here, before hyperref.
+\usepackage{mydefs}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+
+\newcommand{\subj}{\mathrm{subj}}
+
+\newcommand{\jw}[1]{{\bf \textcolor{blue}{John: #1}}}
+%\newcommand{\aw}[1]{\bf \color{greem} Drew: #1}
+%\newcommand{\ym}[1]{\bf \color{red}{ Yi: #1}}
+
+
+\begin{document}
+%
+% paper title
+%\title{Specialized L1 Minimization Techniques for the Representation of Piecewise Smooth Functions}
+%\title{Robust Representation of Piecewise Smooth Functions}
+\title{Numerical Techniques for Robust Representation of Piecewise Smooth Functions}
+
+% author names and IEEE memberships
+% note positions of commas and nonbreaking spaces ( ~ ) LaTeX will not break
+% a structure at a ~ so this keeps an author's name from being broken across
+% two lines.
+% use \thanks{} to gain access to the first footnote area
+% a separate \thanks must be used for each paragraph as LaTeX2e's \thanks
+% was not built to handle multiple paragraphs
+\author{Andrew~Wagner,~\IEEEmembership{Student~Member,~IEEE,}
+\thanks{University of Illinois at Urbana-Champaign}}% <-this % stops a space
+
+% The paper headers
+%\markboth{Journal of \LaTeX\ Class Files,~Vol.~1, No.~8,~August~2002}{Shell \MakeLowercase{\textit{et al.}}: Bare Demo of IEEEtran.cls for Journals}
+% The only time the second header will appear is for the odd numbered pages
+% after the title page when using the twoside option.
+
+
+% If you want to put a publisher's ID mark on the page
+% (can leave text blank if you just want to see how the
+% text height on the first page will be reduced by IEEE)
+%\pubid{0000--0000/00\$00.00~\copyright~2002 IEEE}
+
+% use only for invited papers
+%\specialpapernotice{(Invited Paper)}
+
+% make the title area
+\maketitle
+
+%\begin{keywords}
+%Face Recognition, Feature Extraction, Occlusion and Corruption, Sparse Representation, Compressed Sensing, $\ell^1$-Minimization, Validation and Outlier Rejection.
+%\end{keywords}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%% ABSTRACT
+%\begin{abstract}
+
+%\end{abstract}
+
+{\bf Introduction}
+We are interested in discovering efficient numerical methods for solving the following optimization problem:  Given a set of $n$ non-negative piecewise smooth functions $a_j(\u)$ and a non-negative piecewise smooth function $y(\u)$,  find a linear combination of $a_j(\u)$ parameterized by $\x \in \Re^n$ that minimizes the absolute value of the error function $e(\u) = \sum_ja_j(\u) x_j - y(\u)$, integrated over some compact domain $U$.
+
+This study is primarily motivated by the application to illumination invariant face recognition, in which $a_j$ are a database of images of one person's face under different illuminations, and $y$ is another image of a (possibly different) person's face.  In this case, $\u \in \Re^2$ is the 2D image coordinate, and $U$ is a mask that includes a subset of the human face.  In this case, or minimization problem becomes:
+\begin{equation}\label{eqn:continuous2D}
+\tilde{\x} = \argmin{\x\in \Re^n} \iint_U{\left|\left(\sum_{i=1,\ldots,n} a_i(\u) x_i\right) - y(\u)\right| du_1 du_2}
+\end{equation}
+
+For the sake of discussion, we will focus on the simplified case where $a_i$ are piecewise smooth function of a scalar valued $u$.  Note that if we discretize an image with respect to one of the image coordinates and concatenate the resulting functions, we are left with a new function that is still piecewise continuous.  This fact may turn out useful in practice; it may be possible to make use of the piecewise smoothness of our original function in one direction while ignoring its additional smoothess in the other direction.  Under this reduction we are left with the following minimization:
+\begin{equation}\label{eqn:continuous1D}
+\tilde{\x} = \argmin{\x\in \Re^n} \int_U{ \left|\left(\sum_{i=1,\ldots,n} a_i(u) x_i\right) - y(u)\right| du}
+\end{equation}
+
+For notational convenience, we will further define symbols:
+\begin{equation}
+ f(x) = \int_U{ \left|\left(\sum_{i=1,\ldots,n} a_i(u) x_i\right) - y(u)\right| du}
+\end{equation}
+is the cost function we are trying to minimize.
+\begin{equation}
+ e(x,u) = \left|\left(\sum_{i=1,\ldots,n} a_i(u) x_i\right) - y(u)\right| du
+\end{equation}
+is our error function.
+
+As a first step towards designing an efficient numerical algorithms for minimizing the function f, we must choose a method of evaluating the integral numerically.  One common way to do this is to choose an interpolation function that is easier to integrate, but still closely approximates the original function.  One way to do this is to chose an interpolating function that matches the original function exactly at a uniformly spaced set of sampling points, and interpolates between them.  The two we will be most interested in are the rectangle rule and the trapezoidal rule.
+
+Since we are interested in the effect of the absolute value on the value of f, we will choose to approximate it as an integral of the absolute value of the weighted sums of interpolated versions of $a_j$ and $y$, rather than computing it as an integral of an interpolated version of $|e|$.  This better models the original integral, since $e$ will typically change sign between sample points.  We will be concerned with what effect this may have on the derivatives of $f$ with respect to $x$.
+
+{\bf Rectangle Rule}The rectangle rule results in a piecewise constant approximation of the original function that matches it exactly at the midpoints of the boxes. In other words, the interpolating function is composed of a sum of shifted and scaled non-overlapping box functions.  The absolute value of the function reduces to the absolute value of the values $a_j$.  In this case we are left with a following minimization of the following form:
+\begin{equation}\label{eqn:discrete1DBox}
+\tilde{\x} = \argmin{\x\in \Re^n} \int_U{ \left|\left(\sum_{i=1,\ldots,n} a_i(u) x_i\right) - y(u)\right| du}
+\end{equation}
+
+{\bf Geometry of the optimization problem for Rectangle Rule}
+
+{\bf Optimal Line search for Rectangle Rule}
+
+{\bf Standard LP re-formulation}
+
+{\bf Trapezoidal Rule}  The trapezoidal rule results in linear interpolation between sample points.  In other words, the interpolating function is composed of a sum of shifted and scaled triangle functions that overlap with each of their neighbors by a full sample-width.  In this case, the interpolation function can change sign between sampling points, so we have to be more careful with our integration.  For each sampling interval between samples $i$ and $i+1$, there are multiple cases depending on the signs of $e_i$ and $e_{i+1}$.  The cases with the same sign are uninteresting; locally the $e_*$ values have the same effect on $f$ as they did for the Rectangle Rule.  However, in the mixed sign case, we are left with the following expression for the area between two sample points of mixed sign:
+\begin{equation}\label{eqn:trapezoid_smoothing}
+ \frac{e_i^2 + e_{i+1}^2}{2(\pm e_i \mp e_{i+1})}
+\end{equation}
+where the symbols $\pm$ and $\mp$ are the signs of $e_i$ and $e_{i+1}$, respectively (this just lets us use one expression for both an increasing and a decreasing crossing).  In particular, this expression is (at least locally) smooth in both $e_i$ and $e_{i+1}$.  Note that unlike for the Rectangle Rule, we now have non-zero second partial derivatives of $f$ with respect to $e_i$, and hopefully a meaningful Hessian of $f$ with respect to $x$.  {em This could potentially lead to a Newton-like minimization algorithm exhibiting second-order convergence}.  
+
+% Discuss Continuous case
+
+% Appending derivative of the functions in the optimization
+
+% The non-smooth nature of the optimization problem is an artifact of our discretizatoin of the optimization problem
+
+{\bf Extension to 2D domain} For face recognition applications, our $a_j$ and $y$ correspond to images, i.e. they have a 2D domain.  Both the Rectangle Rule and the Trapezoidal rule can be extended to these cases.  For the Rectangle Rule, the extension is trivial, and leads to a sampled optimization problem of the same form as for the 1D case.  
+
+The 2D version of the Trapezoidal Rule is slightly more complex.  The image plane is subdivided into triangular regions.  Within each region, the function is approximated by a plane going through the graph of the function evaluated at the three sampling points.  There are $2^3$ special cases: two with same sign, and six with mixed sign.  For same sign cases there is just one volume to compute, with mixed sign there are two.  
+
+It may also be possible to make use of the 2D continuous nature of the data by computing terms for the trapezoidal rule for all adjacent pairs of pixels in both image directions.  Doing this would approximate the volume under the graph of $|e|$ by the area of the volume's intersection with regularly spaced vertical planes in both dimensions.  
+
+\end{document}
