@@ -125,44 +125,87 @@ We are interested in discovering efficient numerical methods for solving the fol
 
 This study is primarily motivated by the application to illumination invariant face recognition, in which $a_j$ are a database of images of one person's face under different illuminations, and $y$ is another image of a (possibly different) person's face.  In this case, $\u \in \Re^2$ is the 2D image coordinate, and $U$ is a mask that includes a subset of the human face.  In this case, or minimization problem becomes:
 \begin{equation}\label{eqn:continuous2D}
-\tilde{\x} = \argmin{\x\in \Re^n} \iint_U{\left|\left(\sum_{i=1,\ldots,n} a_i(\u) x_i\right) - y(\u)\right| du_1 du_2}
+\tilde{\x} = \argmin{\x\in \Re^n} \iint_U{\left|\left(\sum_{j=1,\ldots,n} a_j(\u) x_j\right) - y(\u)\right| du_1 du_2}
 \end{equation}
+
 
 For the sake of discussion, we will focus on the simplified case where $a_i$ are piecewise smooth function of a scalar valued $u$.  Note that if we discretize an image with respect to one of the image coordinates and concatenate the resulting functions, we are left with a new function that is still piecewise continuous.  This fact may turn out useful in practice; it may be possible to make use of the piecewise smoothness of our original function in one direction while ignoring its additional smoothess in the other direction.  Under this reduction we are left with the following minimization:
 \begin{equation}\label{eqn:continuous1D}
-\tilde{\x} = \argmin{\x\in \Re^n} \int_U{ \left|\left(\sum_{i=1,\ldots,n} a_i(u) x_i\right) - y(u)\right| du}
+\tilde{\x} = \argmin{\x\in \Re^n} \int_U{ \left|\left(\sum_{j=1,\ldots,n} a_j(u) x_j\right) - y(u)\right| du}
 \end{equation}
 
 For notational convenience, we will further define symbols:
 \begin{equation}
- f(x) = \int_U{ \left|\left(\sum_{i=1,\ldots,n} a_i(u) x_i\right) - y(u)\right| du}
+ f(x) = \int_U{ \left|\left(\sum_{j=1,\ldots,n} a_j(u) x_j\right) - y(u)\right| du}
 \end{equation}
 is the cost function we are trying to minimize.
 \begin{equation}
- e(x,u) = \left|\left(\sum_{i=1,\ldots,n} a_i(u) x_i\right) - y(u)\right| du
+ e(x,u) = \left|\left(\sum_{j=1,\ldots,n} a_j(u) x_j\right) - y(u)\right| du
 \end{equation}
 is our error function.
 
-As a first step towards designing an efficient numerical algorithms for minimizing the function f, we must choose a method of evaluating the integral numerically.  One common way to do this is to choose an interpolation function that is easier to integrate, but still closely approximates the original function.  One way to do this is to chose an interpolating function that matches the original function exactly at a uniformly spaced set of sampling points, and interpolates between them.  The two we will be most interested in are the rectangle rule and the trapezoidal rule.
+{Convexity of $f$ in the Continuous Case } It is easy to show that $f(\x)$ is a convex function in the continuous case.  To do this, it is sufficient to show that:
+\begin{eqnarray*}
+f(\alpha \x^- + (1-\alpha) \x^+) 
+	&\leq& \alpha f(\x^-) + (1-\alpha) f(\x^+) \\
+\int \left|\sum_j a_j (\alpha x_j^- + (1-\alpha) x_j^+) - y\right| du 
+	&\leq& \alpha \int \left|\sum_j a_j x_j^- - y\right|du + (1 - \alpha) \int \left|\sum_j a_j x_j^+ - y\right|du
+\end{eqnarray*}
+If we move the $\alpha$ and $(1-\alpha)$ inside the integrals and into the absolute values, and drop the integrals, we find that it it sufficient to show that:
+\begin{equation*}
+\left|\sum_j a_j (\alpha x_j^- + (1-\alpha) x_j^+) - y\right|
+	\leq \left|\sum_j a_j (\alpha x_j^-) - \alpha y\right| + \left|\sum_j a_j (1 - \alpha) x_j^+ - (1 - \alpha) y\right|.
+\end{equation*}
+The terms inside the left absolute value are the exact same terms that are found inside the right two absolute values, so the inequality holds, and $f$ is convex. 
 
-Since we are interested in the effect of the absolute value on the value of f, we will choose to approximate it as an integral of the absolute value of the weighted sums of interpolated versions of $a_j$ and $y$, rather than computing it as an integral of an interpolated version of $|e|$.  This better models the original integral, since $e$ will typically change sign between sample points.  We will be concerned with what effect this may have on the derivatives of $f$ with respect to $x$.
 
-{\bf Rectangle Rule}The rectangle rule results in a piecewise constant approximation of the original function that matches it exactly at the midpoints of the boxes. In other words, the interpolating function is composed of a sum of shifted and scaled non-overlapping box functions.  The absolute value of the function reduces to the absolute value of the values $a_j$.  In this case we are left with a following minimization of the following form:
+As a first step towards designing an efficient numerical algorithms for minimizing the function f, we must choose a method of evaluating the integral numerically.  One common way to do this is to choose an interpolation function that is easier to integrate, but still closely approximates the original function.  One way to do this is to chose an interpolating function that matches the original function exactly at a uniformly spaced set of sampling points, and interpolates between them.  The two we will be most interested in are the rectangle rule and the trapezoidal rule.  
+
+Since we are interested in the effect of the absolute value on the value of f, we will choose to approximate it as an integral of the absolute value of the weighted sums of interpolated versions of $a_j$ and $y$, rather than computing it as an integral of an interpolated version of $|e|$.  This better models the original integral, since sign changes in $e$ will typically occur between sample points.  Furthermore, since $f$ is convex in general, we will not break the convexity of our optimization problem by substituting in approximate versions of $a_j(u)$ and $y(u)$.  We will be concerned with what effect the choice of approximating functions will have on the derivatives of $f$ with respect to $x$.
+
+{\bf Rectangle Rule} The rectangle rule results in a piecewise constant approximation of the original function that matches it exactly at the midpoints of the boxes. In other words, the interpolating function is composed of a sum of shifted and scaled non-overlapping box functions.  The absolute value of the function reduces to the absolute value of the $a_j$.  In this case we are left with a following minimization of the following form:
 \begin{equation}\label{eqn:discrete1DBox}
-\tilde{\x} = \argmin{\x\in \Re^n} \int_U{ \left|\left(\sum_{i=1,\ldots,n} a_i(u) x_i\right) - y(u)\right| du}
+\tilde{\x} = \argmin{\x\in \Re^n} \sum{ \left|\left(\sum_{j=1,\ldots,n} \a_j x_j\right) - \y\right|}
+\end{equation}
+where $\a_j, \y \in \Re^m$ are vectors containing the sampled values of $a(u)$ and $y(u)$.  If we pack $\a_j$ into the columns of a matrix $A \in \Re^{m \times n}$, we are left with the the familiar expression:
+\begin{equation}\label{eqn:original_optimization}
+\tilde{\x} = \argmin{\x\in \Re^n} || A \x - \y ||_1
 \end{equation}
 
-{\bf Geometry of the optimization problem for Rectangle Rule}
+{\bf Geometry of the optimization problem for Rectangle Rule}  In understanding the behavior of iterative optimization routines, it will be instructive to build a picture of the objective function $f$ in our heads.  If we let $\a_i$ be the rows of $A$ from \ref{eqn:original_optimization}, the objective function can be expressed as:
+\begin{equation}
+f = \sum_{i=1\ldots m}| \a_i \x - y_i | = \sum_{i=1\ldots m} |e_i|
+\end{equation}
+Each $e_i$ is a linear function of $x$. It has a gradient $\a_i$ in the positive orthant and has been shifted ``downwards'' by $y_i$.  If $n=2$ we can plot the $|e_i|$ as a function of $x_1$ and $x_2$.  It will look like a trough that touches zero at the line $\a_i \x - y_i=0$.  $f$ will be the sum of $m$ such troughs, and thus will be convex, continuous, and piecewise linear with gradient discontinuities at the hyperplanes defined by $\a_i \x - y_i=0$. Intuitively, each hyperplane that does not pass through a given $x$ attracts it with a magnitude and direction that is independent of $x$ (but the sign depends which half-space $\x$ is in).
 
-{\bf Optimal Line search for Rectangle Rule}
+As the choice of $m$ increases, the gradient of the discretized objective (where it exists, and when scaled by $\frac{\textrm{Area}(U)}{m}$) will converge to the gradient of the original optimization.  What is a good search direction at points where the gradient is discontinuous?  Let the "trivial subgradient" be computed the same way as the gradient but with zero contribution from the rows of $A$ where $\e_i=0$. {\em As $m$ increases, the trivial subgradient also converges to the gradient of the original optimization problem.} (PROOF PENDING)
 
-{\bf Standard LP re-formulation}
+{\bf The effect of rescaling $A$} It is important to consider what happens when we re-scale $A$.  Re-scaling the columns of $A$ has the effect of (inversely) scaling the meaning of the components of $\x$.  In practice, it may be preferable to solve a re-scaled version of the problem (the optimal $x$ can be inversely rescaled after it has been found if desired).  Re-scaling the columns of $A$ may affect the path an iterative solver takes on the way to the optimal solution, and thus the time it will take to get there.  \footnote{In the recognition step of the face recognition application, where $f = ||\x||_1 + ||\e||_1$, there is more to this story, but that is beyond the scope of this paper.}  (DISCUSSION OF ROW SCALING PENDING)
+
+{\bf Optimal Line search for Rectangle Rule} The geometry of the objective based on the Rectangle Rule can be used to derive a fast method for performing an optimal line search.  First, the line search can be reformulated as a scalar version of the original problem:
+\begin{eqnarray*}
+\min_{\tau}{||A (\x - \tau \g)-y||_1} &=& \min_{\tau} ||A\x - \y - A \g \tau||_1 \\
+&=& \min_{\tau} ||\e - A \g \tau||_1 \\
+&=& \min_{\tau} ||(A\g) \tau - \e||_1 \\
+&=& \min_{x_{\textrm{ls}}} ||\a_{\textrm{ls}} x_{\textrm{ls}} - \y_{\textrm{ls}}||_1
+\end{eqnarray*}
+The optimal value for this scalar optimization can be found by the following sequence of steps:
+\begin{enumerate}
+\item Compute the element-wise ratio of $\y_{\textrm{ls}}$ and $\a_{\textrm{ls}}$, discarding any entries for which $a_i = 0$.  This is the set of candidate values for the optimal $x_{\textrm{ls}}$.
+\item Compute the vector of indices that sorts the previous array, and apply it to $a_i$.
+\item Take the resulting vector, double it, prepend its (undoubled) last entry, and take a cumulative summation.  This is a vector of the derivatives of the objective between the sample points.
+\item Find the index where derivative transitions from negative to positive
+\item Look up and return the value of the $x_{\textrm{ls}}$ corresponding to this index.
+\end{enumerate}
+The re-formulation cost a matrix-vector operation ($A\g$), and the scalar optimization cost a handful of vector operations, the most expensive of which was the sort operation.  The sort operation benefits from the partial ordering in the array, and ends up still being significantly faster than the matrix-vector operation on typical face recognition problem sizes. {\em This ends up being significantly cheaper than the line search in a primal-dual method, which requires at least one matrix-vector operation and several vector operations for each of several iterations. }
+
+%{\bf Standard LP re-formulation}
 
 {\bf Trapezoidal Rule}  The trapezoidal rule results in linear interpolation between sample points.  In other words, the interpolating function is composed of a sum of shifted and scaled triangle functions that overlap with each of their neighbors by a full sample-width.  In this case, the interpolation function can change sign between sampling points, so we have to be more careful with our integration.  For each sampling interval between samples $i$ and $i+1$, there are multiple cases depending on the signs of $e_i$ and $e_{i+1}$.  The cases with the same sign are uninteresting; locally the $e_*$ values have the same effect on $f$ as they did for the Rectangle Rule.  However, in the mixed sign case, we are left with the following expression for the area between two sample points of mixed sign:
 \begin{equation}\label{eqn:trapezoid_smoothing}
  \frac{e_i^2 + e_{i+1}^2}{2(\pm e_i \mp e_{i+1})}
 \end{equation}
-where the symbols $\pm$ and $\mp$ are the signs of $e_i$ and $e_{i+1}$, respectively (this just lets us use one expression for both an increasing and a decreasing crossing).  In particular, this expression is (at least locally) smooth in both $e_i$ and $e_{i+1}$.  Note that unlike for the Rectangle Rule, we now have non-zero second partial derivatives of $f$ with respect to $e_i$, and hopefully a meaningful Hessian of $f$ with respect to $x$.  {em This could potentially lead to a Newton-like minimization algorithm exhibiting second-order convergence}.  
+where the symbols $\pm$ and $\mp$ are the signs of $e_i$ and $e_{i+1}$, respectively (this just lets us use one expression for both an increasing and a decreasing crossing).  In particular, this expression is (at least locally) smooth in both $e_i$ and $e_{i+1}$.  Note that unlike for the Rectangle Rule, we now have non-zero second partial derivatives of $f$ with respect to $e_i$, and hopefully a meaningful Hessian of $f$ with respect to $\x$.  {\em This could potentially lead to a Newton-like minimization algorithm exhibiting second-order convergence}.  
 
 % Discuss Continuous case
 
