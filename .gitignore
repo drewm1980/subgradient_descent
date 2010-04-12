@@ -7,3 +7,9 @@
 *.bbl
 *.blg
 *.backup
+
+*.ps
+*.kilepr
+
+IEEEtrantools_doc.txt
+README
