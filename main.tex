@@ -123,7 +123,7 @@
 {\bf Introduction}
 We are interested in discovering efficient numerical methods for solving the following optimization problem:  Given a set of $n$ non-negative piecewise smooth functions $a_j(\u)$ and a non-negative piecewise smooth function $y(\u)$,  find a linear combination of $a_j(\u)$ parameterized by $\x \in \Re^n$ that minimizes the absolute value of the error function $e(\u) = \sum_ja_j(\u) x_j - y(\u)$, integrated over some compact domain $U$.
 
-This study is primarily motivated by the application to illumination invariant face recognition, in which $a_j$ are a database of images of one person's face under different illuminations, and $y$ is another image of a (possibly different) person's face.  In this case, $\u \in \Re^2$ is the 2D image coordinate, and $U$ is a mask that includes a subset of the human face.  In this case, or minimization problem becomes:
+This study is primarily motivated by the application to illumination invariant face recognition, in which $a_j$ are a database of images of one person's face under different illuminations, and $y$ is another image of a (possibly different) person's face.  In this case, $\u \in \Re^2$ is the 2D image coordinate, and $U$ is a mask that includes a subset of the human face.  In this case, the minimization problem becomes:
 \begin{equation}\label{eqn:continuous2D}
 \tilde{\x} = \argmin{\x\in \Re^n} \iint_U{\left|\left(\sum_{j=1,\ldots,n} a_j(\u) x_j\right) - y(\u)\right| du_1 du_2}
 \end{equation}
@@ -144,7 +144,7 @@ is the cost function we are trying to minimize.
 \end{equation}
 is our error function.
 
-{Convexity of $f$ in the Continuous Case } It is easy to show that $f(\x)$ is a convex function in the continuous case.  To do this, it is sufficient to show that:
+{\bf Convexity of $f$ in the Continuous Case } It is easy to show that $f(\x)$ is a convex function in the continuous case.  To do this, it is sufficient to show that:
 \begin{eqnarray*}
 f(\alpha \x^- + (1-\alpha) \x^+) 
 	&\leq& \alpha f(\x^-) + (1-\alpha) f(\x^+) \\
@@ -178,11 +178,9 @@ f = \sum_{i=1\ldots m}| \a_i \x - y_i | = \sum_{i=1\ldots m} |e_i|
 \end{equation}
 Each $e_i$ is a linear function of $x$. It has a gradient $\a_i$ in the positive orthant and has been shifted ``downwards'' by $y_i$.  If $n=2$ we can plot the $|e_i|$ as a function of $x_1$ and $x_2$.  It will look like a trough that touches zero at the line $\a_i \x - y_i=0$.  $f$ will be the sum of $m$ such troughs, and thus will be convex, continuous, and piecewise linear with gradient discontinuities at the hyperplanes defined by $\a_i \x - y_i=0$. Intuitively, each hyperplane that does not pass through a given $x$ attracts it with a magnitude and direction that is independent of $x$ (but the sign depends which half-space $\x$ is in).
 
-As the choice of $m$ increases, the gradient of the discretized objective (where it exists, and when scaled by $\frac{\textrm{Area}(U)}{m}$) will converge to the gradient of the original optimization.  What is a good search direction at points where the gradient is discontinuous?  Let the "trivial subgradient" be computed the same way as the gradient but with zero contribution from the rows of $A$ where $\e_i=0$. {\em As $m$ increases, the trivial subgradient also converges to the gradient of the original optimization problem.} (PROOF PENDING)
-
 {\bf The effect of rescaling $A$} It is important to consider what happens when we re-scale $A$.  Re-scaling the columns of $A$ has the effect of (inversely) scaling the meaning of the components of $\x$.  In practice, it may be preferable to solve a re-scaled version of the problem (the optimal $x$ can be inversely rescaled after it has been found if desired).  Re-scaling the columns of $A$ may affect the path an iterative solver takes on the way to the optimal solution, and thus the time it will take to get there.  \footnote{In the recognition step of the face recognition application, where $f = ||\x||_1 + ||\e||_1$, there is more to this story, but that is beyond the scope of this paper.}  (DISCUSSION OF ROW SCALING PENDING)
 
-{\bf Optimal Line search for Rectangle Rule} The geometry of the objective based on the Rectangle Rule can be used to derive a fast method for performing an optimal line search.  First, the line search can be reformulated as a scalar version of the original problem:
+{\bf Optimal Line Search for Rectangle Rule} The geometry of the objective based on the Rectangle Rule can be used to derive a fast method for performing an optimal line search.  First, the line search can be reformulated as a scalar version of the original problem:
 \begin{eqnarray*}
 \min_{\tau}{||A (\x - \tau \g)-y||_1} &=& \min_{\tau} ||A\x - \y - A \g \tau||_1 \\
 &=& \min_{\tau} ||\e - A \g \tau||_1 \\
@@ -193,11 +191,26 @@ The optimal value for this scalar optimization can be found by the following seq
 \begin{enumerate}
 \item Compute the element-wise ratio of $\y_{\textrm{ls}}$ and $\a_{\textrm{ls}}$, discarding any entries for which $a_i = 0$.  This is the set of candidate values for the optimal $x_{\textrm{ls}}$.
 \item Compute the vector of indices that sorts the previous array, and apply it to $a_i$.
-\item Take the resulting vector, double it, prepend its (undoubled) last entry, and take a cumulative summation.  This is a vector of the derivatives of the objective between the sample points.
-\item Find the index where derivative transitions from negative to positive
+\item Take the resulting vector, double it, prepend half of its sum, and take a cumulative summation.  This results in a vector of the derivatives of the objective between the sample points. 
+\item Find the index where derivative vector computed in the last step transitions from negative (or zero) to positive
 \item Look up and return the value of the $x_{\textrm{ls}}$ corresponding to this index.
 \end{enumerate}
+(PICTURE OF AN EXAMPLE OBJECTIVE PENDING TO SPEED COMPREHENSION)
+
 The re-formulation cost a matrix-vector operation ($A\g$), and the scalar optimization cost a handful of vector operations, the most expensive of which was the sort operation.  The sort operation benefits from the partial ordering in the array, and ends up still being significantly faster than the matrix-vector operation on typical face recognition problem sizes. {\em This ends up being significantly cheaper than the line search in a primal-dual method, which requires at least one matrix-vector operation and several vector operations for each of several iterations. }
+
+{\bf Convergence of the Discretized and Continuous Gradients } It is important to investigate the conditions under which we can compute a useful descent direction for the optimization problem.  
+
+In the discretized version, our optimization function is continuous, piecewise linear, and convex.  For almost all $\x$ the gradient of the objective will be a descent direction, but we have a family of up to $m$ hyperplanes where the the function is non-smooth and thus the gradient cannot be computed.  This fact cannot be ignored, especially since, (discounting some special cases), the optimal solution will lie on the intersection of $n$ of these hyperplanes.  For any $\x$ lying on one or more of the hyperplanes, we will have a non-trivial set of subgradients, some of which may be descent directions.  Fortunately, the special properties of our data (and the original continuous optimization) may make it possible to compute a good descent direction using a trivial choice of subgradient:
+
+Define the "trivial subgradient" of the discretized gradient to be computed the same way as the gradient but with zero contribution from the rows of $A$ where $\e_i=0$. {\em As $m$ increases, the trivial subgradient also converges to the gradient of the original optimization problem.} 
+
+We make the following assumption on our problem (still for the 1D $u$ case):  For all $\x$, $\e(u)$ must be non-zero almost everywhere, and have not more than $\tilde m$ zero crossings, where $\tilde m$ is a positive integer that depends on the continuous optimization problem.  In the face recognition application, this may be a good model, either because $\y(u)$ came from a face other than the ones in $a_j$, because there is some misalignment, or simply because the training illuminations do not model the test illumination perfectly.
+
+Under the above assumption we endeavor to show that as $m$ increases (i.e. the discretization gets finer), the trivial subgradient of the discretized objective will converge to the gradient of the continuous objective, up to the constant scale factor $\frac{\textrm{Length}(U)}{m}$.  Furthermore (the opposite) of this vector will be a useful descent direction.  (PROOF PENDING)
+
+The analysis of the gradients and their relation to problem size was inspired partially by the experimental observation that the choice of subgradient does not dramatically affect the convergence rate of the discretized optimization on image data. (GRAPHS PENDING)
+
 
 %{\bf Standard LP re-formulation}
 
@@ -205,7 +218,7 @@ The re-formulation cost a matrix-vector operation ($A\g$), and the scalar optimi
 \begin{equation}\label{eqn:trapezoid_smoothing}
  \frac{e_i^2 + e_{i+1}^2}{2(\pm e_i \mp e_{i+1})}
 \end{equation}
-where the symbols $\pm$ and $\mp$ are the signs of $e_i$ and $e_{i+1}$, respectively (this just lets us use one expression for both an increasing and a decreasing crossing).  In particular, this expression is (at least locally) smooth in both $e_i$ and $e_{i+1}$.  Note that unlike for the Rectangle Rule, we now have non-zero second partial derivatives of $f$ with respect to $e_i$, and hopefully a meaningful Hessian of $f$ with respect to $\x$.  {\em This could potentially lead to a Newton-like minimization algorithm exhibiting second-order convergence}.  
+where the symbols $\pm$ and $\mp$ are the signs of $e_i$ and $e_{i+1}$, respectively (this just lets us use one expression for both an increasing and a decreasing crossing). (INSERT PICTURE ILLUSTRATING HOW THIS WAS DERIVED) In particular, this expression is (at least locally) smooth in both $e_i$ and $e_{i+1}$.  Note that unlike for the Rectangle Rule, we now have non-zero second partial derivatives of $f$ with respect to $e_i$, and hopefully a meaningful Hessian of $f$ with respect to $\x$.  {\em This could potentially lead to a Newton-like minimization algorithm exhibiting second-order convergence}.  
 
 % Discuss Continuous case
 
@@ -218,5 +231,26 @@ where the symbols $\pm$ and $\mp$ are the signs of $e_i$ and $e_{i+1}$, respecti
 The 2D version of the Trapezoidal Rule is slightly more complex.  The image plane is subdivided into triangular regions.  Within each region, the function is approximated by a plane going through the graph of the function evaluated at the three sampling points.  There are $2^3$ special cases: two with same sign, and six with mixed sign.  For same sign cases there is just one volume to compute, with mixed sign there are two.  
 
 It may also be possible to make use of the 2D continuous nature of the data by computing terms for the trapezoidal rule for all adjacent pairs of pixels in both image directions.  Doing this would approximate the volume under the graph of $|e|$ by the area of the volume's intersection with regularly spaced vertical planes in both dimensions.  
+
+
+{\bf Improving GPU Performance } There is reason to believe that algorithms leveraging the above properties may be more amenable to efficient GPU implementation.  One of the main factors governing GPU performance is the number of arithmetic operations that are performed on data for each element that has to be loaded into cache, a.k.a. arithmetic intensity.  GPU's typically require an arithmetic intesity of about 7-15 floating point operations (FLOPS) per load to achieve peak throughput.  
+
+As a first example, consider the computation of a $m \times n$ matrix-vector multiplication with $n$ small enough to fit into cache so that it need only be loaded once.  A fused scalar multiply-add requires 1 FLOP, so the multiplication will have an arithmetic intensity of about 1 FLOP/load.  Since the Arithmetic Logic Units (ALU's) on the GPU can churn through the data faster than it can be loaded, the time cost of the multiplication is roughly the cost of loading $A$.  
+
+As a second example, consider the computation of $A^T A$, again for $m \gg n$.  This can be computed as an $n \times n$ outer product of each row of A with itself, plus an $n x n$ accumulation, for a total of $n \times n$ flops per row of $A$.  Assume that this outer product fits into cache, so that we only have to do $n$ loads per row of $A$.  This results in an arithmetic intensity of $n$, resulting in much better usage of the ALU's of the GPU.
+
+Since we have not been blessed with a problem that has an obvious implementation with a very high arithmetic intensity in its formulation (and we are not, at least for this part of the pipeline), we have two main avenues for improving the efficiency of the algorithm on the GPU:
+\begin{itemize}
+\item Reduce the number of times we have to load the data arrays without changing the arithmetic intensity.  First-order primal algorithms will have a natural advantage over first-order primal-dual algorithms in terms of their per-iteration cost, due to their relative simplicity.  However, it remains to be seen if they will require fewer or less iterations to converge.
+\item Reformulate the problem so that it has a higher arithmetic intensity.  For example, the extra computations for the trapezoidal rule may come almost for free due to the data-local nature of the computation.  This may be especially true for the triangle-mesh idea, since it falls very close to the type of computations performed in a traditional graphics pipeline.
+\end{itemize}
+
+{\bf Conclusion } The special nature of the data may be able to improve the design of a search algorithm in the following ways:
+\begin{enumerate}
+\item For $m \gg n$, we can get away with a trivial choice of subgradient as a descent direction.
+\item There will likely exist monotonic runs in $\frac{y_i}{a_i}$.  This significantly reduces the cost of a sort operation, making it feasible to compute an optimal step size for a given descent direction.  
+\item It may be possible to compute a good approximation to the Hessian of the continuous optimization problem, resulting in an algorithm requiring far fewer iterations to convergence.  
+\item The nature of the above computations may be significantly more amenable to efficient GPU implementation due to their simplicity and/or higher arithmetic intensity.
+\end{enumerate}
 
 \end{document}
