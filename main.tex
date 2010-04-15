@@ -80,7 +80,7 @@
 % paper title
 %\title{Specialized L1 Minimization Techniques for the Representation of Piecewise Smooth Functions}
 %\title{Robust Representation of Piecewise Smooth Functions}
-\title{Numerical Techniques for Robust Representation of Piecewise Smooth Functions}
+\title{Numerical Techniques for Robust Representation of Images}
 
 % author names and IEEE memberships
 % note positions of commas and nonbreaking spaces ( ~ ) LaTeX will not break
@@ -214,11 +214,19 @@ The analysis of the gradients and their relation to problem size was inspired pa
 
 %{\bf Standard LP re-formulation}
 
-{\bf Trapezoidal Rule}  The trapezoidal rule results in linear interpolation between sample points.  In other words, the interpolating function is composed of a sum of shifted and scaled triangle functions that overlap with each of their neighbors by a full sample-width.  In this case, the interpolation function can change sign between sampling points, so we have to be more careful with our integration.  For each sampling interval between samples $i$ and $i+1$, there are multiple cases depending on the signs of $e_i$ and $e_{i+1}$.  The cases with the same sign are uninteresting; locally the $e_*$ values have the same effect on $f$ as they did for the Rectangle Rule.  However, in the mixed sign case, we are left with the following expression for the area between two sample points of mixed sign:
-\begin{equation}\label{eqn:trapezoid_smoothing}
- \frac{e_i^2 + e_{i+1}^2}{2(\pm e_i \mp e_{i+1})}
-\end{equation}
-where the symbols $\pm$ and $\mp$ are the signs of $e_i$ and $e_{i+1}$, respectively (this just lets us use one expression for both an increasing and a decreasing crossing). (INSERT PICTURE ILLUSTRATING HOW THIS WAS DERIVED) In particular, this expression is (at least locally) smooth in both $e_i$ and $e_{i+1}$.  Note that unlike for the Rectangle Rule, we now have non-zero second partial derivatives of $f$ with respect to $e_i$, and hopefully a meaningful Hessian of $f$ with respect to $\x$.  {\em This could potentially lead to a Newton-like minimization algorithm exhibiting second-order convergence}.  
+{\bf Trapezoidal Rule}  The trapezoidal rule results in linear interpolation between sample points.  In other words, the interpolating function is composed of a sum of shifted and scaled triangle functions that overlap with each of their neighbors by a full sample-width.  In this case, the interpolation function can change sign between sampling points, so we have to be more careful with our integration.  For each sampling interval between samples $i$ and $i+1$, there are multiple cases depending on the signs of $e_i$ and $e_{i+1}$.  The cases with the same sign are uninteresting; locally the $e_*$ values have the same effect on $f$ as they did for the Rectangle Rule.  However, in the mixed sign case, the positive area between the two interpolating points has a more intersting form:
+%\begin{equation}\label{eqn:trapezoid_smoothing}
+% \frac{e_i^2 + e_{i+1}^2}{2(\pm e_i \mp e_{i+1})}
+%\end{equation}
+%where the symbols $\pm$ and $\mp$ are the signs of $e_i$ and $e_{i+1}$, respectively (this just lets us use one expression for both an %increasing and a decreasing crossing). 
+\begin{figure}
+ \centering
+ \includegraphics[width=4in]{bowtie.pdf}
+ % bowtie.pdf: 595x842 pixel, 72dpi, 20.99x29.70 cm, bb=0 0 595 842
+ \caption{Positive area where the sign of $e$ transitions from (+) to (-) between discretization points.}
+ \label{fig:bowtie}
+\end{figure}
+In particular, this expression is (at least locally) smooth in both $e_i$ and $e_{i+1}$.  Note that unlike for the Rectangle Rule, we now have non-zero second partial derivatives of $f$ with respect to $e_i$, and hopefully a meaningful Hessian of $f$ with respect to $\x$.  {\em This could potentially lead to a Newton-like minimization algorithm exhibiting second-order convergence}.  
 
 % Discuss Continuous case
 
