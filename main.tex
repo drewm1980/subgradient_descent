@@ -120,6 +120,7 @@
 
 %\end{abstract}
 
+
 {\bf Introduction}
 We are interested in discovering efficient numerical methods for solving the following optimization problem:  Given a set of $n$ non-negative piecewise smooth functions $a_j(\u)$ and a non-negative piecewise smooth function $y(\u)$,  find a linear combination of $a_j(\u)$ parameterized by $\x \in \Re^n$ that minimizes the absolute value of the error function $e(\u) = \sum_ja_j(\u) x_j - y(\u)$, integrated over some compact domain $U$.
 
@@ -264,6 +265,14 @@ Since we have not been blessed with a problem that has an obvious implementation
 \item Reduce the number of times we have to load the data arrays without changing the arithmetic intensity.  First-order primal algorithms will have a natural advantage over first-order primal-dual algorithms in terms of their per-iteration cost, due to their relative simplicity.  However, it remains to be seen if they will require fewer or less iterations to converge.
 \item Reformulate the problem so that it has a higher arithmetic intensity.  For example, the extra computations for the trapezoidal rule may come almost for free due to the data-local nature of the computation.  This may be especially true for the triangle-mesh idea, since it falls very close to the type of computations performed in a traditional graphics pipeline.
 \end{itemize}
+
+
+{\bf Computing the descent direction for rectangular integration }
+%First order methods for solving extremely tall $\ell_1$ minimization problems are limited in speed primarily
+%by their memory bandwidth requirements.  Furthermore, they require tuning and proper scaling of the data
+%to ensure that they converge to the correct solution, and that the convergence occurs in a small number
+%of iterations.  For this reason, these notes investigate algorithms that exhibit the following properties:
+
 
 {\bf Conclusion } The special nature of the data may be able to improve the design of a search algorithm in the following ways:
 \begin{enumerate}
