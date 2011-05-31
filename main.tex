@@ -1,6 +1,6 @@
-\documentclass[12pt,journal,draftcls,letterpaper,twocolumn]{IEEEtran}
+%\documentclass[11pt,journal,draftcls,letterpaper,twocolumn]{IEEEtran}
 %\documentclass[12pt,journal,draftcls,letterpaper,onecolumn]{IEEEtran}
-%\documentclass[9.5pt,journal,final,finalsubmission,twocolumn]{IEEEtran}
+\documentclass[9.5pt,journal,final,finalsubmission,twocolumn]{IEEEtran}
 % *************************************************************************
 
 \usepackage{times}
@@ -159,7 +159,7 @@ at the midpoints of the sampling regions. This is illustrated in figure
 \ref{fig:rectangle}.
 \begin{figure}
  \centering
- \includegraphics[width=5in]{integration_rectangle_midpoint.pdf}
+ \includegraphics[width=3in]{integration_rectangle_midpoint.pdf}
  % integration_rectangle_midpoint.pdf: 119x111 pixel, 72dpi, 4.20x3.92 cm, bb=0 0 119 111
  \caption{Numerical integration of a function $e(u)$ by the Rectangle Rule for 1D $u$.}
  \label{fig:rectangle}
@@ -281,7 +281,7 @@ set of $m+1$ regularly spaced sample points and
 
 \begin{figure}[htb]
  \centering
- \includegraphics[width=4in]{integration_trapezoid.pdf}
+ \includegraphics[width=3in]{integration_trapezoid.pdf}
  % integration_trapezoid.pdf: 119x111 pixel, 72dpi, 4.20x3.92 cm, bb=0 0 119 111
  \caption{Numerical intetegration of the function $e(u)$ by the trapezoid method for 1D $u$.}
  \label{fig:trapezoid}
@@ -406,9 +406,9 @@ In the first case, $\x$ does not lie on any attracting hyperplanes, i.e. $\e_i(\
 \forall i$. In this case, the function is locally linear, and the gradient can be computed
 by applying the appropriate sign change to each row of $A$, and then summing the rows of $A$:
 \begin{eqnarray}
-f_{local} = \sum_i |e_i(\tilde\x)| = \sign(\e(\tilde\x)) .* e(\tilde\x) \\
-\nabla_x f_{local} = A^T * \sign(\e(\tilde\x)) \\
-d = -A^T * \sign(\e(\tilde\x)) \\
+f_{local} &=& \sum_i |e_i(\tilde\x)| = \sign(\e(\tilde\x)) .* e(\tilde\x) \\
+\nabla_x f_{local} &=& A^T * \sign(\e(\tilde\x)) \\
+d &=& -A^T * \sign(\e(\tilde\x))
 \end{eqnarray}
 Note that once $\tilde\x$ is known, $d$ can be computed in a single pass through $A$.
 
@@ -417,47 +417,50 @@ of $n$ intersecting hyperplanes.  Without loss of generality, we reorder and par
 matrices $A$ and $\bb$ such that the top $n$ rows correspond to the equations that are solved
 with equality at $\tilde\x$:
 \begin{eqnarray}
-A = \left[\begin{array}A_1 A_2 \end{array}\right]\\
-\bb = \left[\begin{array}\bb_1 \bb_2 \end{array}\right]\\
+A = \left[\begin{array}{c}A_1 \\ A_2 \end{array}\right]\\
+\bb = \left[\begin{array}{c}\bb_1 \\ \bb_2 \end{array}\right]\\
 A_1 \in \Re^{n \times n} \\
-A_2 \in \Re^{m-n \times n} \\
+A_2 \in \Re^{m-n \times n}
 \end{eqnarray}
 At $\tilde\x$, $\bb_1 = 0$.  Under our assumptions on $A$, $A_1$ is invertible.
 We make the following state-dependent affine coordinate transformation:
 \begin{eqnarray}
-\hat\x = A_1\x - \bb_1 \\
-\x = A_1^-1 (\hat\x + \bb_1) \\
+\hat\x &=& A_1\x - \bb_1 \\
+\x &=& A_1^{-1} (\hat\x + \bb_1)
 \end{eqnarray}
 With this substitution,
 \begin{eqnarray}
-f(\hat\x) &=& ||\hat\x||_1 + ||A_2 A_1^-1 (\hat\x + \bb_1) - \bb_2 ||_1 \\
-&=& ||\hat\x||_1 + || (A_2 A_1^-1) \hat\x + (A_2 A_1^-1 \bb_1 - \bb_2) ||_1 \\
-&=& ||\hat\x||_1 + || \hat A \hat\x + \hat \bb ||_1 \\
+f(\hat\x) &=& ||\hat\x||_1 + ||A_2 A_1^{-1} (\hat\x + \bb_1) - \bb_2 ||_1 \\
+&=& ||\hat\x||_1 + || (A_2 A_1^{-1}) \hat\x + (A_2 A_1^{-1} \bb_1 - \bb_2) ||_1 \\
+&=& ||\hat\x||_1 + || \hat A \hat\x + \hat \bb ||_1
 \end{eqnarray}
 For infinitesimal $\hat\x$, the signs of the entries of the second term of $f$ will be
-governed by the signs of the entries of $ \hat \bb = A_2 A_1^-1 \bb_1 - \bb_2$, and $f$ locally
+governed by the signs of the entries of $ \hat \bb = A_2 A_1^{-1} \bb_1 - \bb_2$, and $f$ locally
 reduces to:
 \begin{eqnarray}
 f(\hat\x) &=& ||\hat\x||_1 + \sign(\hat \bb)^T(\hat A \hat \x + \hat \bb) \\
 &=& ||\hat\x||_1 + (\sign(\hat \bb)^T \hat A) \hat \x + (\sign(\hat \bb)^T  \hat \bb) \\
-&=& ||\hat\x||_1 + \g^T \hat \x + ||\hat \bb||_1 \\
+&=& ||\hat\x||_1 + \g^T \hat \x + ||\hat \bb||_1
 \end{eqnarray}
 For the purposes of deriving a descent direction, we can neglect the constant last term, leaving:
 \begin{eqnarray}
-f &=& ||\hat\x||_1 + \g^T \hat \x 
+f &=& ||\hat\x||_1 + \g^T \hat \x
 \end{eqnarray}
 This function has a stepest descent direction:
 \begin{eqnarray}
-\hat d &=& -\shrink(\g) \\
+\hat d &=& -\shrink(\g)
 \end{eqnarray}
 where the operator $\shrink(\x) = \sign(\x).*\max(|\x|-1,0)$ is the standard
 soft thresholding operator. Mapping back to the original coordinate system and unrolling substitutions,
 we have:
 \begin{eqnarray}
-\d &=& A^-1 \hat \d
- &=& -A^-1 \shrink(\g) \\
- &=& -A^-1 \shrink((\sign(A_2 A_1^-1 \bb_1 - \bb_2$)^T (A_2 A_1^-1))) \\
+\d &=& A_1^{-1} \hat \d \\
+ &=& -A_1^{-1} \shrink(\g) \\
+ &=& -A_1^{-1} \shrink(\hat A ^T \ \sign(\hat b)) \\
+ &=& -A_1^{-1} \shrink(\hat A ^T \ \sign(A_2 A_1^{-1} \bb_1 - \bb_2))
 \end{eqnarray}
+Unfortunately, while $\hat \d$ is the steepest descent direction for the optimization in transformed coordinates,
+$\d$ is in general not the steepest descent direction for the original problem.  
 
 
 {\bf Conclusion } The special nature of the data may be able to improve the design of a search algorithm in the following ways:
