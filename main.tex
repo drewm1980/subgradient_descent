@@ -435,8 +435,11 @@ f(\hat\x) &=& ||\hat\x||_1 + ||A_2 A_1^{-1} (\hat\x + \bb_1) - \bb_2 ||_1 \\
 &=& ||\hat\x||_1 + || \hat A \hat\x + \hat \bb ||_1
 \end{eqnarray}
 For infinitesimal $\hat\x$, the signs of the entries of the second term of $f$ will be
-governed by the signs of the entries of $ \hat \bb = A_2 A_1^{-1} \bb_1 - \bb_2$, and $f$ locally
-reduces to:
+governed by the signs of the entries of $ \hat \bb = A_2 A_1^{-1} \bb_1 - \bb_2$.  
+%Note: $A_1^{-1} \bb_1$ is the center of the linear
+Note that due to our reordering of the rows, the entries of $\hat \bb$ are non-zero,
+and the sign is well defined.
+Therefore, $f$ locally reduces to:
 \begin{eqnarray}
 f(\hat\x) &=& ||\hat\x||_1 + \sign(\hat \bb)^T(\hat A \hat \x + \hat \bb) \\
 &=& ||\hat\x||_1 + (\sign(\hat \bb)^T \hat A) \hat \x + (\sign(\hat \bb)^T  \hat \bb) \\
@@ -457,11 +460,12 @@ we have:
 \d &=& A_1^{-1} \hat \d \\
  &=& -A_1^{-1} \shrink(\g) \\
  &=& -A_1^{-1} \shrink(\hat A ^T \ \sign(\hat \bb)) \\
- &=& -A_1^{-1} \shrink(\hat A ^T \ \sign(A_2 A_1^{-1} \bb_1 - \bb_2))
+ &=& -A_1^{-1} \shrink(\hat A ^T \ \sign(A_2 A_1^{-1} \bb_1 - \bb_2)) \\
+ &=& -A_1^{-1} \shrink(A_1^{-T}A_2^T \sign(A_2 A_1^{-1} \bb_1 - \bb_2))
 \end{eqnarray}
 Unfortunately, while $\hat \d$ is the steepest descent direction for the optimization in transformed coordinates,
 $\d$ is in general not the steepest descent direction for the original problem.  
-
+{\em What if only some rows of $e_1$ are zero?}
 
 {\bf Conclusion } The special nature of the data may be able to improve the design of a search algorithm in the following ways:
 \begin{enumerate}
